@@ -1,0 +1,2 @@
+copy OLDPROJECT-A1.sas NEWPROJECT-A1.txt
+

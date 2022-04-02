@@ -1,0 +1,82 @@
+1                                                          The SAS System                       Saturday, April  2, 2022 04:34:00 PM
+
+NOTE: Unable to open SASUSER.REGSTRY. WORK.REGSTRY will be opened instead.
+NOTE: All registry changes will be lost at the end of the session.
+
+WARNING: Unable to copy SASUSER registry to WORK registry. Because of this, you will not see registry customizations during this 
+         session.
+NOTE: Unable to open SASUSER.PROFILE. WORK.PROFILE will be opened instead.
+NOTE: All profile changes will be lost at the end of the session.
+NOTE: Copyright (c) 2016 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.4 (TS1M7 MBCS3170) 
+      Licensed to CLINICAL TRIAL SERVICE (GUANGZHOU) CO., LTD, Site 70278908.
+NOTE: This session is executing on the X64_10PRO  platform.
+
+
+
+NOTE: Analytical products:
+      
+      SAS/STAT 15.2
+      SAS/IML 15.2
+
+NOTE: Additional host information:
+
+ X64_10PRO WIN 10.0.17763  Workstation
+
+NOTE: SAS initialization used:
+      real time           0.70 seconds
+      cpu time            0.65 seconds
+      
+1          
+2          %macro drive(dir,ext);
+3          %let filrf=mydir;
+4          %let rc=%sysfunc(filename(filrf,&dir));
+5          %let did=%sysfunc(dopen(&filrf));
+6          %let memcnt=%sysfunc(dnum(&did));
+7          
+8          proc printto log=prgnm new;
+9          run;
+10         %do i = 1 %to &memcnt;
+11         	%let name=%qscan(%qsysfunc(dread(&did,&i)),-1,.);
+12         	%if %qupcase(%qsysfunc(dread(&did,&i))) ne %qupcase(&ext) %then %do;
+13         		%if (%superq(ext) ne and %qupcase(&name) = %qupcase(&ext)) or (%superq(ext) = and %superq(name) ne) %then
+14         		%put %qsysfunc(dread(&did,&i));
+15         	%end;
+16         %end;
+17         
+18         proc printto log='Create_BAT.log';
+19         run;
+20         %let rc=%sysfunc(dclose(&did));
+21         %mend drive;
+22         *****************;
+23         ***** start *****;
+24         %let ADD = %sysget(ADD);
+25         %PUT &ADD.;
+D:\python_project\name_change\demo_batch_namechange\batch
+26         %let OLD_TEXT = %sysget(OLD_TEXT);
+27         %let NEW_TEXT = %sysget(NEW_TEXT);
+28         
+29         libname here "&ADD.";
+NOTE: Libref HERE was successfully assigned as follows: 
+      Engine:        V9 
+      Physical Name: D:\python_project\name_change\demo_batch_namechange\batch
+30         
+31         data _null_;
+32         call symput('herepth',pathname('here'));*<-- pathname for %drive macro;
+33         run;
+
+NOTE: DATA statement used (Total process time):
+      real time           0.09 seconds
+      cpu time            0.04 seconds
+      
+
+34         
+35         filename prgnm "Create_BAT.txt"; *<-- file w/ Program names;
+36         
+37         %drive(&herepth,sas); *<-- create list of programs as text file;
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           1.09 seconds
+      cpu time            0.95 seconds
+      

@@ -1,0 +1,134 @@
+NOTE: PROCEDURE PRINTTO used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+38         *----*;
+39         Data table;
+40         infile prgnm delimiter='!';
+41         length ttlvar $135.;
+42         input ttlvar $;
+43         run;
+
+NOTE: The infile PRGNM is:
+      Filename=D:\python_project\name_change\demo_batch_namechange\Create_BAT.txt,
+      RECFM=V,LRECL=32767,File Size (bytes)=289,
+      Last Modified=02Apr2022:16:34:28,
+      Create Time=02Apr2022:16:34:28
+
+NOTE: 9 records were read from the infile PRGNM.
+      The minimum record length was 0.
+      The maximum record length was 122.
+NOTE: SAS went to a new line when INPUT statement reached past the end of a line.
+NOTE: The data set WORK.TABLE has 6 observations and 1 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.05 seconds
+      cpu time            0.03 seconds
+      
+
+44         
+45         data table;
+46         set table;
+47         if index(ttlvar,'.sas')>0;
+48         prog=scan(ttlvar,1,'.');
+49         progn=tranwrd(prog,"&OLD_TEXT.","&NEW_TEXT."); *<-- set new file name;
+50         if index(prog,'_BAT')>0 then delete;
+51         drop ttlvar;
+52         run;
+
+NOTE: There were 6 observations read from the data set WORK.TABLE.
+NOTE: The data set WORK.TABLE has 1 observations and 2 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.03 seconds
+      cpu time            0.00 seconds
+      
+
+53         
+54         *-----------------------------*
+55         create
+56         _Run_All_SAS_Programs.bat
+57         *----------------------------*;
+58         data sasprogs;
+59         set table;
+60         sort1=_n_;
+61         progsas=trim(left(prog))||'.sas';*<-- set whole name;
+62         progtxt=trim(left(progn))||'.txt';
+63         progsas_n=trim(left(progn))||'.sas';
+64         keep progsas progtxt progsas_n;
+65         run;
+
+NOTE: There were 1 observations read from the data set WORK.TABLE.
+NOTE: The data set WORK.SASPROGS has 1 observations and 3 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.01 seconds
+      cpu time            0.01 seconds
+      
+
+66         *----output BAT file----------*;
+67         data _null_;
+68         set sasprogs;
+69         FILE "&herepth\Copy_all_SAS_Programs.bat" ;
+70         PUT @1  "copy "  progsas  progtxt  ;
+71         put ;
+3                                                    The SAS System                  Saturday, April  2, 2022 04:34:00 PM
+
+72         run ;
+
+NOTE: The file "D:\python_project\name_change\demo_batch_namechange\batch\Copy_all_SAS_Programs.bat" is:
+      Filename=D:\python_project\name_change\demo_batch_namechange\batch\Copy_all_SAS_Programs.bat,
+      RECFM=V,LRECL=32767,File Size (bytes)=0,
+      Last Modified=02Apr2022:16:34:28,
+      Create Time=02Apr2022:16:34:28
+
+NOTE: 2 records were written to the file 
+      "D:\python_project\name_change\demo_batch_namechange\batch\Copy_all_SAS_Programs.bat".
+      The minimum record length was 0.
+      The maximum record length was 40.
+NOTE: There were 1 observations read from the data set WORK.SASPROGS.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+73         
+74         data _null_;
+75         set sasprogs;
+76         FILE "&herepth\Reverse_all_SAS_Programs.bat" ;
+77         PUT @1  "copy "  progtxt progsas_n;
+78         put ;
+79         run ;
+
+NOTE: The file "D:\python_project\name_change\demo_batch_namechange\batch\Reverse_all_SAS_Programs.bat" is:
+      Filename=D:\python_project\name_change\demo_batch_namechange\batch\Reverse_all_SAS_Programs.bat,
+      RECFM=V,LRECL=32767,File Size (bytes)=0,
+      Last Modified=02Apr2022:16:34:28,
+      Create Time=02Apr2022:16:34:28
+
+NOTE: 2 records were written to the file 
+      "D:\python_project\name_change\demo_batch_namechange\batch\Reverse_all_SAS_Programs.bat".
+      The minimum record length was 0.
+      The maximum record length was 40.
+NOTE: There were 1 observations read from the data set WORK.SASPROGS.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+80         
+81         *----clean-up----------*;
+82         data _null_;
+83         fname="tempfile";
+84         rc=filename(fname,"Create_BAT.txt");
+85         if rc = 0 and fexist(fname) then
+86         rc=fdelete(fname);
+87         rc=filename(fname);
+88         run;
+
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+89         *----end: clean-up----------*;
+90         
+
